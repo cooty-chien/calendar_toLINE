@@ -4,8 +4,8 @@
 
 const CONFIG = {
   // LINE LIFF ID
-  LIFF_ID: '你的日曆 LIFF_ID',
+  LIFF_ID: '2011182369-iQeZQmqb',
 
   // GAS Web App API URL
-  GAS_URL: 'https://script.google.com/macros/s/你的GAS網址/exec'
+  GAS_URL: 'https://script.google.com/macros/s/AKfycbx9dqpDZl4CvYli31fMXoecU-sd1hRegOJCJMk6kK1Hh4dWrYPmkfyHTonZ-GX9Rrwu/exec'
 };
