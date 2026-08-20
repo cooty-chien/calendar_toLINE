@@ -8,13 +8,15 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
   <!-- ===== 頁面主要容器 ===== -->
   <main class="container">
+
     <!-- ===== 頁面標題 ===== -->
     <header class="page-header">
       <div>
-        <h1>日曆查詢</h1>
-        <p>查詢 iCloud 與 Google 行事曆</p>
+        <h1>📅 日曆查詢</h1>
+        <p>查詢 iCloud 與 Google Calendar 行程並傳送到 LINE</p>
       </div>
     </header>
 
@@ -27,11 +29,13 @@
          日期區塊
          ====================================================== -->
     <section class="form-card">
+
       <div class="section-header">
         <h2>日期</h2>
         <span>選擇行事曆查詢時間範圍</span>
       </div>
-    
+
+      <!-- ===== 日期類型 ===== -->
       <div class="form-group">
         <select id="dateType" onchange="changeDateType()">
           <option value="today">今天</option>
@@ -41,57 +45,64 @@
           <option value="custom">自訂日期</option>
         </select>
       </div>
-    
-      <!-- ===== 查詢日期區間 ===== -->
+
+      <!-- ===== 實際查詢日期區間 ===== -->
       <div class="date-range-display">
         <div class="date-range-title">查詢日期區間</div>
         <div id="dateRangeText" class="date-range-text">-</div>
       </div>
-    
+
       <!-- ===== 自訂日期 ===== -->
       <div id="customDate" class="custom-date hidden">
+
         <div class="form-group">
           <label for="startDate">開始日期</label>
           <input type="date" id="startDate">
           <div id="startDateText" class="date-week"></div>
         </div>
-    
+
         <div class="date-separator">至</div>
-    
+
         <div class="form-group">
           <label for="endDate">結束日期</label>
           <input type="date" id="endDate">
           <div id="endDateText" class="date-week"></div>
         </div>
+
       </div>
+
     </section>
 
     <!-- ======================================================
-         日曆來源區塊
+         日曆來源
          ====================================================== -->
     <section class="form-card">
+
       <div class="section-header">
         <h2>日曆來源</h2>
-        <span>查詢結果會一起傳送到 LINE</span>
+        <span>選擇要查詢的行事曆</span>
       </div>
 
-      <!-- ===== iCloud ===== -->
+      <!-- ===== iCloud Calendar ===== -->
       <div class="option-row">
+
         <div class="option-text">
-          <strong>iCloud Calendar</strong>
-          <small>查詢 iCloud 所有行事曆</small>
+          <strong>☁️ iCloud Calendar</strong>
+          <small>查詢 iCloud 行事曆</small>
         </div>
 
         <label class="switch">
           <input type="checkbox" id="icloud" checked>
           <span class="slider"></span>
         </label>
+
       </div>
 
-      <!-- ===== Google ===== -->
+      <!-- ===== Google Calendar ===== -->
       <div class="option-row">
+
         <div class="option-text">
-          <strong>Google Calendar</strong>
+          <strong>G Google Calendar</strong>
           <small>查詢 Google 行事曆</small>
         </div>
 
@@ -99,12 +110,12 @@
           <input type="checkbox" id="google" checked>
           <span class="slider"></span>
         </label>
+
       </div>
+
     </section>
 
-    <!-- ======================================================
-         查詢按鈕
-         ====================================================== -->
+    <!-- ===== 查詢按鈕 ===== -->
     <button
       id="searchBtn"
       class="search-btn"
@@ -114,34 +125,38 @@
       <span>開始查詢</span>
     </button>
 
-    <!-- ======================================================
-         查詢狀態
-         ====================================================== -->
-    <div id="message" class="message" aria-live="polite"></div>
+    <!-- ===== 查詢結果訊息 ===== -->
+    <div id="message" class="message"></div>
 
     <!-- ======================================================
-         Debug
-         預設隱藏，測試 GAS 時使用
+         GAS Debug
          ====================================================== -->
     <section id="debugPanel" class="debug-panel hidden">
+
       <div class="debug-header">
-        <h2>Debug</h2>
-        <span>GAS API 回應</span>
+        <h2>GAS 回應資訊</h2>
+        <span>方便測試 LIFF 與 GAS API</span>
       </div>
+
       <pre id="debugInfo"></pre>
+
     </section>
 
     <!-- ===== 頁尾 ===== -->
     <footer class="page-footer">
       Calendar Assistant
     </footer>
+
   </main>
 
   <!-- ===== LINE LIFF SDK ===== -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
   <!-- ===== 專案設定 ===== -->
   <script src="config.js"></script>
+
   <!-- ===== 頁面 JavaScript ===== -->
   <script src="app.js"></script>
+
 </body>
 </html>
