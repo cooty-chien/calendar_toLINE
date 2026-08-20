@@ -1,5 +1,5 @@
 /* ===== style.css ===== */
-/* GitHub LIFF 日曆查詢頁面樣式 */
+/* 日曆 LIFF 頁面樣式 */
 
 * {
   box-sizing: border-box;
@@ -9,141 +9,312 @@ body {
   margin: 0;
   padding: 20px;
   background: #f5f6f8;
-  font-family: Arial, "Noto Sans TC", sans-serif;
   color: #222;
+  font-family: Arial, "Noto Sans TC", sans-serif;
 }
 
 .container {
+  width: 100%;
   max-width: 600px;
   margin: 0 auto;
 }
 
-h1 {
-  margin: 10px 0 24px;
-  text-align: center;
-  font-size: 28px;
-}
-
-.range-buttons {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-}
-
-.range-buttons button {
-  height: 60px;
-  border: 0;
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  font-size: 20px;
-  font-weight: bold;
-  color: #333;
-  cursor: pointer;
-}
-
-.range-buttons button:last-child {
-  grid-column: 1 / 3;
-}
-
-.range-buttons button:active {
-  transform: scale(0.98);
-}
-
-.custom-area {
-  margin-top: 24px;
-  padding: 20px;
-  background: #fff;
-  border-radius: 14px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.date-group {
+.page-header {
   margin-bottom: 20px;
 }
 
-.date-group:last-child {
-  margin-bottom: 0;
+.page-header h1 {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.3;
 }
 
-.date-group label {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 18px;
-  font-weight: bold;
+.page-header p {
+  margin: 6px 0 0;
+  color: #777;
+  font-size: 15px;
 }
 
-.date-group input {
-  width: 100%;
-  height: 50px;
-  padding: 0 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background: #fff;
-  font-size: 18px;
+/* ===== LIFF 狀態 ===== */
+
+.status {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 14px;
 }
 
-.date-text {
-  margin-top: 6px;
-  font-size: 16px;
+.status-loading {
+  background: #eee;
   color: #666;
 }
 
-.search-button {
+.status-success {
+  background: #e9f8ef;
+  color: #168344;
+}
+
+.status-error {
+  background: #fdecec;
+  color: #c62828;
+}
+
+/* ===== 卡片 ===== */
+
+.form-card {
+  margin-bottom: 16px;
+  padding: 20px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.section-header {
+  margin-bottom: 16px;
+}
+
+.section-header h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.section-header span {
+  display: block;
+  margin-top: 5px;
+  color: #888;
+  font-size: 14px;
+}
+
+/* ===== 表單 ===== */
+
+.form-group {
+  margin-bottom: 14px;
+}
+
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+select,
+input[type="date"] {
+  width: 100%;
+  height: 50px;
+  padding: 0 12px;
+  border: 1px solid #d8d8d8;
+  border-radius: 9px;
+  background: #fff;
+  color: #222;
+  font-size: 17px;
+  outline: none;
+}
+
+select:focus,
+input[type="date"]:focus {
+  border-color: #888;
+}
+
+/* ===== 自訂日期 ===== */
+
+.custom-date {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid #eee;
+}
+
+.date-separator {
+  margin: 4px 0 14px;
+  color: #888;
+  font-size: 15px;
+  text-align: center;
+}
+
+.date-week {
+  margin-top: 6px;
+  color: #777;
+  font-size: 14px;
+}
+
+/* ===== 選項 ===== */
+
+.option-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 68px;
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.option-row:last-child {
+  border-bottom: 0;
+}
+
+.option-text {
+  padding-right: 16px;
+}
+
+.option-text strong {
+  display: block;
+  font-size: 17px;
+}
+
+.option-text small {
+  display: block;
+  margin-top: 5px;
+  color: #888;
+  font-size: 14px;
+}
+
+/* ===== Toggle ===== */
+
+.switch {
+  position: relative;
+  flex: 0 0 auto;
+  width: 50px;
+  height: 30px;
+}
+
+.switch input {
+  width: 0;
+  height: 0;
+  opacity: 0;
+}
+
+.slider {
+  position: absolute;
+  inset: 0;
+  border-radius: 30px;
+  background: #ccc;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.slider::before {
+  position: absolute;
+  content: "";
+  width: 24px;
+  height: 24px;
+  left: 3px;
+  top: 3px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: 0.2s;
+}
+
+.switch input:checked + .slider {
+  background: #06c755;
+}
+
+.switch input:checked + .slider::before {
+  transform: translateX(20px);
+}
+
+/* ===== 查詢按鈕 ===== */
+
+.search-btn {
   width: 100%;
   height: 58px;
-  margin-top: 24px;
+  margin: 8px 0 20px;
   border: 0;
   border-radius: 12px;
   background: #06c755;
   color: #fff;
-  font-size: 21px;
+  font-size: 20px;
   font-weight: bold;
   cursor: pointer;
 }
 
-.search-button:active {
-  transform: scale(0.98);
+.search-btn:active {
+  transform: scale(0.99);
 }
 
-.search-button:disabled {
+.search-btn:disabled {
   background: #aaa;
   cursor: default;
 }
 
+/* ===== 訊息 ===== */
+
 .message {
-  margin-top: 20px;
+  min-height: 24px;
+  margin-bottom: 16px;
+  color: #555;
+  font-size: 16px;
+  line-height: 1.6;
   text-align: center;
   white-space: pre-wrap;
-  font-size: 17px;
-  line-height: 1.5;
 }
 
-/* 除錯資訊 */
-.debug-info {
+/* ===== Debug ===== */
+
+.debug-panel {
   margin-top: 16px;
-  padding: 12px;
-  background: #eee;
-  border-radius: 8px;
+  padding: 16px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.debug-header {
+  margin-bottom: 10px;
+}
+
+.debug-header h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.debug-header span {
+  color: #888;
   font-size: 13px;
+}
+
+.debug-panel pre {
+  margin: 0;
+  padding: 12px;
+  background: #f2f2f2;
+  border-radius: 8px;
+  font-size: 12px;
   line-height: 1.5;
-  text-align: left;
   white-space: pre-wrap;
   word-break: break-all;
-  overflow-x: auto;
 }
+
+/* ===== 隱藏 ===== */
+
+.hidden {
+  display: none;
+}
+
+/* ===== 頁尾 ===== */
+
+.page-footer {
+  padding: 20px 0 10px;
+  color: #aaa;
+  font-size: 13px;
+  text-align: center;
+}
+
+/* ===== 手機 ===== */
 
 @media (max-width: 400px) {
   body {
     padding: 16px;
   }
 
-  h1 {
+  .page-header h1 {
     font-size: 25px;
   }
 
-  .range-buttons button {
-    height: 56px;
-    font-size: 18px;
+  .form-card {
+    padding: 18px;
   }
 }
