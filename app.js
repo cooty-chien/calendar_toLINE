@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     setStatus('LINE 已連線', 'success');
     document.getElementById('searchBtn').disabled = false;
 
-    // 預設今天
+    // 預設選擇今天
     changeDateType();
   } catch (error) {
     console.error('LIFF 初始化失敗：', error);
@@ -44,6 +44,7 @@ function changeDateType() {
     const today = new Date();
     setDateValue('startDate', today);
     setDateValue('endDate', today);
+    updateDateRangeText();
     return;
   }
 
@@ -60,15 +61,18 @@ function changeDateType() {
     startDate = addDays(today, 1);
     endDate = startDate;
   } else if (type === 'thisWeek') {
+    // 本週固定為星期一～星期日
     startDate = getMonday(today);
     endDate = addDays(startDate, 6);
   } else if (type === 'nextWeek') {
+    // 下週固定為星期一～星期日
     startDate = addDays(getMonday(today), 7);
     endDate = addDays(startDate, 6);
   }
 
   setDateValue('startDate', startDate);
   setDateValue('endDate', endDate);
+  updateDateRangeText();
 }
 
 // ===== 取得星期一 =====
@@ -103,7 +107,7 @@ function setDateValue(id, date) {
   updateDateText(id);
 }
 
-// ===== 日期星期 =====
+// ===== 日期顯示星期 =====
 function updateDateText(id) {
   const input = document.getElementById(id);
   const output = document.getElementById(id + 'Text');
@@ -114,22 +118,47 @@ function updateDateText(id) {
   }
 
   const date = new Date(input.value + 'T00:00:00');
-  const weekNames = ['日', '一', '二', '三', '四', '五', '六'];
+  output.textContent = formatDateWithWeek(date);
+}
 
+// ===== 更新查詢日期區間 =====
+function updateDateRangeText() {
+  const startDate = document.getElementById('startDate').value;
+  const endDate = document.getElementById('endDate').value;
+  const output = document.getElementById('dateRangeText');
+
+  if (!startDate || !endDate) {
+    output.textContent = '-';
+    return;
+  }
+
+  const start = new Date(startDate + 'T00:00:00');
+  const end = new Date(endDate + 'T00:00:00');
+
+  output.textContent =
+    formatDateWithWeek(start) + ' ～ ' + formatDateWithWeek(end);
+}
+
+// ===== 日期格式 + 星期 =====
+function formatDateWithWeek(date) {
+  const weekNames = ['日', '一', '二', '三', '四', '五', '六'];
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
 
-  output.textContent = `${year}/${month}/${day} (${weekNames[date.getDay()]})`;
+  return `${year}/${month}/${day} (${weekNames[date.getDay()]})`;
 }
 
-// ===== 日期變更 =====
+// ===== 開始日期變更 =====
 document.getElementById('startDate').addEventListener('change', function () {
   updateDateText('startDate');
+  updateDateRangeText();
 });
 
+// ===== 結束日期變更 =====
 document.getElementById('endDate').addEventListener('change', function () {
   updateDateText('endDate');
+  updateDateRangeText();
 });
 
 // ===== 查詢日曆 =====
@@ -166,6 +195,7 @@ async function searchCalendar() {
   searchBtn.innerHTML = '<span>查詢中...</span>';
   showMessage('');
 
+  // ===== 傳送給 GAS 的資料 =====
   const requestData = {
     action: 'searchCalendar',
     userId: userId,
@@ -178,6 +208,8 @@ async function searchCalendar() {
   try {
     console.log('Calendar Request:', requestData);
 
+    // ===== 呼叫 GAS =====
+    // 使用 text/plain 避免 GitHub Pages → GAS 的 CORS preflight
     const response = await fetch(CONFIG.GAS_URL, {
       method: 'POST',
       headers: {
@@ -190,6 +222,7 @@ async function searchCalendar() {
 
     console.log('GAS Response:', responseText);
 
+    // ===== 顯示 GAS 原始回應 =====
     showDebug({
       httpStatus: response.status,
       response: responseText
@@ -211,6 +244,7 @@ async function searchCalendar() {
       );
     }
 
+    // ===== 顯示 GAS JSON =====
     showDebug({
       httpStatus: response.status,
       result: result
