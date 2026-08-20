@@ -4,7 +4,6 @@
 // LINE User ID
 let userId = '';
 
-
 // ===== 頁面初始化 =====
 
 document.addEventListener('DOMContentLoaded', async function () {
@@ -14,7 +13,7 @@ document.addEventListener('DOMContentLoaded', async function () {
       liffId: CONFIG.LIFF_ID
     });
 
-    // 如果尚未登入 LINE，要求登入
+    // 尚未登入 LINE 時要求登入
     if (!liff.isLoggedIn()) {
       liff.login();
       return;
@@ -22,21 +21,20 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // 取得 LINE 使用者資料
     const profile = await liff.getProfile();
-
-    // 儲存 LINE User ID
     userId = profile.userId;
 
     console.log('LINE User ID:', userId);
 
     // 預設選擇今天
     selectRange('today');
-
   } catch (error) {
     console.error('LIFF 初始化失敗：', error);
     showMessage('LIFF 初始化失敗，請重新開啟。');
+    showDebug({
+      error: error.message
+    });
   }
 });
-
 
 // ===== 選擇查詢區間 =====
 
@@ -60,53 +58,42 @@ function selectRange(type) {
       end = start;
       break;
 
-    // 本週：固定星期一～星期日
+    // 本週：星期一～星期日
     case 'thisWeek':
       start = getMonday(today);
       end = addDays(start, 6);
       break;
 
-    // 下週：固定星期一～星期日
+    // 下週：星期一～星期日
     case 'nextWeek':
       start = addDays(getMonday(today), 7);
       end = addDays(start, 6);
       break;
 
-    // 自訂
+    // 自訂日期
     case 'custom':
-      // 自訂模式保留目前日期
       return;
 
     default:
       return;
   }
 
-  // 設定開始日期
+  // 設定開始與結束日期
   setDateValue('startDate', start);
-
-  // 設定結束日期
   setDateValue('endDate', end);
-
-  // 清除訊息
   showMessage('');
 }
-
 
 // ===== 取得星期一 =====
 
 function getMonday(date) {
   const result = new Date(date);
   const day = result.getDay();
-
-  // 星期日為 0，所以星期日需要往前 6 天
-  // 其他日期直接計算距離星期一的天數
   const diff = day === 0 ? -6 : 1 - day;
 
   result.setDate(result.getDate() + diff);
-
   return result;
 }
-
 
 // ===== 日期加減 =====
 
@@ -115,7 +102,6 @@ function addDays(date, days) {
   result.setDate(result.getDate() + days);
   return result;
 }
-
 
 // ===== 設定日期輸入框 =====
 
@@ -129,10 +115,9 @@ function setDateValue(id, date) {
   // input[type="date"] 使用 yyyy-MM-dd
   input.value = `${year}-${month}-${day}`;
 
-  // 更新星期顯示
+  // 更新星期
   updateDateText(id);
 }
-
 
 // ===== 更新日期星期 =====
 
@@ -145,7 +130,6 @@ function updateDateText(id) {
     return;
   }
 
-  // 加上時間避免部分瀏覽器時區造成日期偏移
   const date = new Date(input.value + 'T00:00:00');
 
   const weekNames = [
@@ -167,13 +151,11 @@ function updateDateText(id) {
     `${year}/${month}/${day} (${weekNames[date.getDay()]})`;
 }
 
-
 // ===== 開始日期變更 =====
 
 document.getElementById('startDate').addEventListener('change', function () {
   updateDateText('startDate');
 });
-
 
 // ===== 結束日期變更 =====
 
@@ -181,13 +163,15 @@ document.getElementById('endDate').addEventListener('change', function () {
   updateDateText('endDate');
 });
 
-
 // ===== 查詢日曆 =====
 
 async function searchCalendar() {
   const startDate = document.getElementById('startDate').value;
   const endDate = document.getElementById('endDate').value;
   const searchButton = document.getElementById('searchButton');
+
+  // 清除上一筆除錯資訊
+  showDebug('');
 
   // 尚未取得 LINE User ID
   if (!userId) {
@@ -214,7 +198,7 @@ async function searchCalendar() {
   searchButton.disabled = true;
 
   try {
-    // 建立傳給 GAS 的資料
+    // 建立送給 GAS 的資料
     const requestData = {
       action: 'searchCalendar',
       userId: userId,
@@ -222,10 +206,16 @@ async function searchCalendar() {
       endDate: endDate
     };
 
+    // 顯示送出的 JSON
+    showDebug({
+      request: requestData
+    });
+
     console.log('GAS URL:', CONFIG.GAS_URL);
     console.log('Request:', requestData);
 
-    // 呼叫 GAS Web App
+    // 呼叫 GAS
+    // 使用 text/plain 避免 GitHub Pages → GAS 的 CORS preflight
     const response = await fetch(CONFIG.GAS_URL, {
       method: 'POST',
       headers: {
@@ -236,12 +226,18 @@ async function searchCalendar() {
 
     console.log('HTTP Status:', response.status);
 
-    // 先以文字方式取得回應
+    // 先以文字取得 GAS 回應
     const responseText = await response.text();
 
     console.log('GAS Response:', responseText);
 
-    // HTTP 狀態不是 200～299
+    // 顯示 GAS 原始回應
+    showDebug({
+      httpStatus: response.status,
+      response: responseText
+    });
+
+    // HTTP 狀態錯誤
     if (!response.ok) {
       throw new Error(
         'HTTP ' + response.status + '：' + responseText
@@ -251,13 +247,20 @@ async function searchCalendar() {
     let result;
 
     try {
-      // 將 GAS 回傳內容轉成 JSON
+      // 將 GAS 回應轉成 JSON
       result = JSON.parse(responseText);
     } catch (error) {
+      // 目前 GAS 回傳 OK 時會進入這裡
       throw new Error(
         'GAS 回傳內容不是 JSON：' + responseText
       );
     }
+
+    // 顯示解析後 JSON
+    showDebug({
+      httpStatus: response.status,
+      result: result
+    });
 
     console.log('GAS Result:', result);
 
@@ -272,24 +275,47 @@ async function searchCalendar() {
         result.message || '查詢失敗。'
       );
     }
-
   } catch (error) {
-    // 顯示實際錯誤，方便目前測試
+    // 顯示實際錯誤
     console.error('日曆查詢失敗：', error);
 
     showMessage(
       '日曆查詢失敗：' + error.message
     );
 
+    // 顯示錯誤資訊
+    showDebug({
+      error: error.message
+    });
   } finally {
     // 恢復查詢按鈕
     searchButton.disabled = false;
   }
 }
 
-
-// ===== 顯示訊息 =====
+// ===== 顯示狀態訊息 =====
 
 function showMessage(text) {
   document.getElementById('message').textContent = text;
+}
+
+// ===== 顯示 JSON 除錯資訊 =====
+
+function showDebug(data) {
+  const debugInfo = document.getElementById('debugInfo');
+
+  if (!debugInfo) return;
+
+  if (data === '') {
+    debugInfo.textContent = '';
+    return;
+  }
+
+  try {
+    // JSON 格式化顯示
+    debugInfo.textContent = JSON.stringify(data, null, 2);
+  } catch (error) {
+    // 無法轉 JSON 時直接顯示文字
+    debugInfo.textContent = String(data);
+  }
 }
