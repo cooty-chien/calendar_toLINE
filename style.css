@@ -1,7 +1,12 @@
+/* ===== style.css ===== */
+/* 日曆 LIFF 前端樣式 */
+
+/* 基本設定 */
 * {
   box-sizing: border-box;
 }
 
+/* 頁面 */
 body {
   margin: 0;
   padding: 20px;
@@ -10,23 +15,27 @@ body {
   color: #222;
 }
 
+/* 主容器 */
 .container {
   max-width: 600px;
   margin: 0 auto;
 }
 
+/* 標題 */
 h1 {
   margin: 10px 0 24px;
   text-align: center;
   font-size: 28px;
 }
 
+/* 查詢區間按鈕 */
 .range-buttons {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
 }
 
+/* 一般按鈕 */
 .range-buttons button {
   height: 60px;
   border: 0;
@@ -36,16 +45,20 @@ h1 {
   font-size: 20px;
   font-weight: bold;
   color: #333;
+  cursor: pointer;
 }
 
+/* 自訂按鈕佔滿一整列 */
 .range-buttons button:last-child {
   grid-column: 1 / 3;
 }
 
+/* 按鈕點擊效果 */
 .range-buttons button:active {
   transform: scale(0.98);
 }
 
+/* 日期區域 */
 .custom-area {
   margin-top: 24px;
   padding: 20px;
@@ -54,14 +67,17 @@ h1 {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
+/* 日期欄位 */
 .date-group {
   margin-bottom: 20px;
 }
 
+/* 最後一個日期欄位取消下方間距 */
 .date-group:last-child {
   margin-bottom: 0;
 }
 
+/* 日期標題 */
 .date-group label {
   display: block;
   margin-bottom: 8px;
@@ -69,21 +85,25 @@ h1 {
   font-weight: bold;
 }
 
+/* 日期輸入框 */
 .date-group input {
   width: 100%;
   height: 50px;
   padding: 0 12px;
   border: 1px solid #ddd;
   border-radius: 8px;
+  background: #fff;
   font-size: 18px;
 }
 
+/* 日期星期文字 */
 .date-text {
   margin-top: 6px;
   font-size: 16px;
   color: #666;
 }
 
+/* 查詢按鈕 */
 .search-button {
   width: 100%;
   height: 58px;
@@ -94,22 +114,29 @@ h1 {
   color: #fff;
   font-size: 21px;
   font-weight: bold;
+  cursor: pointer;
 }
 
+/* 查詢按鈕點擊效果 */
 .search-button:active {
   transform: scale(0.98);
 }
 
+/* 查詢按鈕停用 */
+.search-button:disabled {
+  background: #aaa;
+  cursor: default;
+}
+
+/* 系統訊息 */
 .message {
   margin-top: 20px;
   text-align: center;
   font-size: 17px;
+  line-height: 1.5;
 }
 
-.hidden {
-  display: none;
-}
-
+/* 手機版 */
 @media (max-width: 400px) {
   body {
     padding: 16px;
