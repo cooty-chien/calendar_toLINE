@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📅 日曆查詢</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+<body>
+
+<div class="container">
+  <h1>📅 日曆查詢</h1>
+
+  <div class="range-buttons">
+    <button onclick="selectRange('today')">今天</button>
+    <button onclick="selectRange('tomorrow')">明天</button>
+    <button onclick="selectRange('thisWeek')">本週</button>
+    <button onclick="selectRange('nextWeek')">下週</button>
+    <button onclick="selectRange('custom')">自訂</button>
+  </div>
+
+  <div id="customArea" class="custom-area hidden">
+    <div class="date-group">
+      <label>開始日期</label>
+      <input type="date" id="startDate">
+      <div id="startDateText" class="date-text"></div>
+    </div>
+
+    <div class="date-group">
+      <label>結束日期</label>
+      <input type="date" id="endDate">
+      <div id="endDateText" class="date-text"></div>
+    </div>
+  </div>
+
+  <button id="searchButton" class="search-button" onclick="searchCalendar()">
+    查詢日曆
+  </button>
+
+  <div id="message" class="message"></div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
