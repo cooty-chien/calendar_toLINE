@@ -31,7 +31,7 @@
         <h2>日期</h2>
         <span>選擇行事曆查詢時間範圍</span>
       </div>
-
+    
       <div class="form-group">
         <select id="dateType" onchange="changeDateType()">
           <option value="today">今天</option>
@@ -41,7 +41,13 @@
           <option value="custom">自訂日期</option>
         </select>
       </div>
-
+    
+      <!-- ===== 查詢日期區間 ===== -->
+      <div class="date-range-display">
+        <div class="date-range-title">查詢日期區間</div>
+        <div id="dateRangeText" class="date-range-text">-</div>
+      </div>
+    
       <!-- ===== 自訂日期 ===== -->
       <div id="customDate" class="custom-date hidden">
         <div class="form-group">
@@ -49,9 +55,9 @@
           <input type="date" id="startDate">
           <div id="startDateText" class="date-week"></div>
         </div>
-
+    
         <div class="date-separator">至</div>
-
+    
         <div class="form-group">
           <label for="endDate">結束日期</label>
           <input type="date" id="endDate">
