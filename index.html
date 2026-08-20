@@ -3,62 +3,139 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>📅 日曆查詢</title>
-
-  <!-- LINE LIFF SDK -->
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <!-- 前端設定 -->
-  <script src="config.js"></script>
-  <!-- 頁面樣式 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>日曆查詢</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <!-- 頁面標題 -->
-    <h1>📅 日曆查詢</h1>
+  <!-- ===== 頁面主要容器 ===== -->
+  <main class="container">
+    <!-- ===== 頁面標題 ===== -->
+    <header class="page-header">
+      <div>
+        <h1>日曆查詢</h1>
+        <p>查詢 iCloud 與 Google 行事曆</p>
+      </div>
+    </header>
 
-    <!-- 查詢區間按鈕 -->
-    <div class="range-buttons">
-      <button type="button" onclick="selectRange('today')">今天</button>
-      <button type="button" onclick="selectRange('tomorrow')">明天</button>
-      <button type="button" onclick="selectRange('thisWeek')">本週</button>
-      <button type="button" onclick="selectRange('nextWeek')">下週</button>
-      <button type="button" onclick="selectRange('custom')">自訂</button>
+    <!-- ===== LIFF 連線狀態 ===== -->
+    <div id="status" class="status status-loading" aria-live="polite">
+      <span class="status-text">LIFF 初始化中...</span>
     </div>
 
-    <!-- 日期選擇區 -->
-    <div id="customArea" class="custom-area">
-      <!-- 開始日期 -->
-      <div class="date-group">
-        <label for="startDate">開始日期</label>
-        <input type="date" id="startDate">
-        <div id="startDateText" class="date-text"></div>
+    <!-- ======================================================
+         日期區塊
+         ====================================================== -->
+    <section class="form-card">
+      <div class="section-header">
+        <h2>日期</h2>
+        <span>選擇行事曆查詢時間範圍</span>
       </div>
 
-      <!-- 結束日期 -->
-      <div class="date-group">
-        <label for="endDate">結束日期</label>
-        <input type="date" id="endDate">
-        <div id="endDateText" class="date-text"></div>
+      <div class="form-group">
+        <select id="dateType" onchange="changeDateType()">
+          <option value="today">今天</option>
+          <option value="tomorrow">明天</option>
+          <option value="thisWeek">本週</option>
+          <option value="nextWeek">下週</option>
+          <option value="custom">自訂日期</option>
+        </select>
       </div>
-    </div>
 
-    <!-- 查詢按鈕 -->
-    <button type="button" id="searchButton" class="search-button" onclick="searchCalendar()">
-      查詢日曆
+      <!-- ===== 自訂日期 ===== -->
+      <div id="customDate" class="custom-date hidden">
+        <div class="form-group">
+          <label for="startDate">開始日期</label>
+          <input type="date" id="startDate">
+          <div id="startDateText" class="date-week"></div>
+        </div>
+
+        <div class="date-separator">至</div>
+
+        <div class="form-group">
+          <label for="endDate">結束日期</label>
+          <input type="date" id="endDate">
+          <div id="endDateText" class="date-week"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================
+         日曆來源區塊
+         ====================================================== -->
+    <section class="form-card">
+      <div class="section-header">
+        <h2>日曆來源</h2>
+        <span>查詢結果會一起傳送到 LINE</span>
+      </div>
+
+      <!-- ===== iCloud ===== -->
+      <div class="option-row">
+        <div class="option-text">
+          <strong>iCloud Calendar</strong>
+          <small>查詢 iCloud 所有行事曆</small>
+        </div>
+
+        <label class="switch">
+          <input type="checkbox" id="icloud" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <!-- ===== Google ===== -->
+      <div class="option-row">
+        <div class="option-text">
+          <strong>Google Calendar</strong>
+          <small>查詢 Google 行事曆</small>
+        </div>
+
+        <label class="switch">
+          <input type="checkbox" id="google" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+    </section>
+
+    <!-- ======================================================
+         查詢按鈕
+         ====================================================== -->
+    <button
+      id="searchBtn"
+      class="search-btn"
+      onclick="searchCalendar()"
+      disabled
+    >
+      <span>開始查詢</span>
     </button>
-      查詢日曆
-    </button>
 
-    <!-- 狀態訊息 -->
-    <div id="message" class="message"></div>
+    <!-- ======================================================
+         查詢狀態
+         ====================================================== -->
+    <div id="message" class="message" aria-live="polite"></div>
 
-    <!-- 除錯資訊 -->
-    <pre id="debugInfo" class="debug-info"></pre>
-  </div>
+    <!-- ======================================================
+         Debug
+         預設隱藏，測試 GAS 時使用
+         ====================================================== -->
+    <section id="debugPanel" class="debug-panel hidden">
+      <div class="debug-header">
+        <h2>Debug</h2>
+        <span>GAS API 回應</span>
+      </div>
+      <pre id="debugInfo"></pre>
+    </section>
 
-  <!-- 前端程式 -->
+    <!-- ===== 頁尾 ===== -->
+    <footer class="page-footer">
+      Calendar Assistant
+    </footer>
+  </main>
+
+  <!-- ===== LINE LIFF SDK ===== -->
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <!-- ===== 專案設定 ===== -->
+  <script src="config.js"></script>
+  <!-- ===== 頁面 JavaScript ===== -->
   <script src="app.js"></script>
 </body>
 </html>
