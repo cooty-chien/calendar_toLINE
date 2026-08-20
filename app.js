@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     console.log('LINE User ID:', userId);
 
-    // 預設顯示今天
+    // 預設選擇今天
     selectRange('today');
 
   } catch (error) {
@@ -42,15 +42,12 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 function selectRange(type) {
   const today = new Date();
-
-  // 將時間歸零，避免時間造成日期計算誤差
   today.setHours(0, 0, 0, 0);
 
   let start;
   let end;
 
   switch (type) {
-
     // 今天
     case 'today':
       start = today;
@@ -77,7 +74,7 @@ function selectRange(type) {
 
     // 自訂
     case 'custom':
-      // 自訂模式不修改目前日期
+      // 自訂模式保留目前日期
       return;
 
     default:
@@ -99,13 +96,10 @@ function selectRange(type) {
 
 function getMonday(date) {
   const result = new Date(date);
-
   const day = result.getDay();
 
-  // 星期日 = 0
-  // 星期一 = 1
-  // ...
-  // 星期六 = 6
+  // 星期日為 0，所以星期日需要往前 6 天
+  // 其他日期直接計算距離星期一的天數
   const diff = day === 0 ? -6 : 1 - day;
 
   result.setDate(result.getDate() + diff);
@@ -118,9 +112,7 @@ function getMonday(date) {
 
 function addDays(date, days) {
   const result = new Date(date);
-
   result.setDate(result.getDate() + days);
-
   return result;
 }
 
@@ -131,24 +123,18 @@ function setDateValue(id, date) {
   const input = document.getElementById(id);
 
   const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
 
-  const month = String(
-    date.getMonth() + 1
-  ).padStart(2, '0');
-
-  const day = String(
-    date.getDate()
-  ).padStart(2, '0');
-
-  // input[type=date] 使用 yyyy-MM-dd
+  // input[type="date"] 使用 yyyy-MM-dd
   input.value = `${year}-${month}-${day}`;
 
-  // 更新星期文字
+  // 更新星期顯示
   updateDateText(id);
 }
 
 
-// ===== 更新日期顯示 =====
+// ===== 更新日期星期 =====
 
 function updateDateText(id) {
   const input = document.getElementById(id);
@@ -159,9 +145,8 @@ function updateDateText(id) {
     return;
   }
 
-  const date = new Date(
-    input.value + 'T00:00:00'
-  );
+  // 加上時間避免部分瀏覽器時區造成日期偏移
+  const date = new Date(input.value + 'T00:00:00');
 
   const weekNames = [
     '日',
@@ -174,15 +159,10 @@ function updateDateText(id) {
   ];
 
   const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
 
-  const month = String(
-    date.getMonth() + 1
-  ).padStart(2, '0');
-
-  const day = String(
-    date.getDate()
-  ).padStart(2, '0');
-
+  // 顯示格式：2026/08/20 (四)
   text.textContent =
     `${year}/${month}/${day} (${weekNames[date.getDay()]})`;
 }
@@ -190,39 +170,24 @@ function updateDateText(id) {
 
 // ===== 開始日期變更 =====
 
-document
-  .getElementById('startDate')
-  .addEventListener('change', function () {
-
-    updateDateText('startDate');
-
-  });
+document.getElementById('startDate').addEventListener('change', function () {
+  updateDateText('startDate');
+});
 
 
 // ===== 結束日期變更 =====
 
-document
-  .getElementById('endDate')
-  .addEventListener('change', function () {
-
-    updateDateText('endDate');
-
-  });
+document.getElementById('endDate').addEventListener('change', function () {
+  updateDateText('endDate');
+});
 
 
 // ===== 查詢日曆 =====
 
 async function searchCalendar() {
-
-  const startDate =
-    document.getElementById('startDate').value;
-
-  const endDate =
-    document.getElementById('endDate').value;
-
-  const searchButton =
-    document.getElementById('searchButton');
-
+  const startDate = document.getElementById('startDate').value;
+  const endDate = document.getElementById('endDate').value;
+  const searchButton = document.getElementById('searchButton');
 
   // 尚未取得 LINE User ID
   if (!userId) {
@@ -230,13 +195,11 @@ async function searchCalendar() {
     return;
   }
 
-
   // 未選擇日期
   if (!startDate || !endDate) {
     showMessage('請選擇日期。');
     return;
   }
-
 
   // 結束日期不可早於開始日期
   if (startDate > endDate) {
@@ -244,78 +207,83 @@ async function searchCalendar() {
     return;
   }
 
-
   // 顯示查詢中
   showMessage('查詢中...');
 
   // 防止重複點擊
   searchButton.disabled = true;
 
-
   try {
+    // 建立傳給 GAS 的資料
+    const requestData = {
+      action: 'searchCalendar',
+      userId: userId,
+      startDate: startDate,
+      endDate: endDate
+    };
 
-    // 傳送給 GAS
+    console.log('GAS URL:', CONFIG.GAS_URL);
+    console.log('Request:', requestData);
+
+    // 呼叫 GAS Web App
     const response = await fetch(CONFIG.GAS_URL, {
-
       method: 'POST',
-
       headers: {
         'Content-Type': 'application/json'
       },
-
-      body: JSON.stringify({
-
-        // GAS 用這個 action 判斷要執行什麼功能
-        action: 'searchCalendar',
-
-        // LINE User ID
-        userId: userId,
-
-        // 查詢開始日期
-        startDate: startDate,
-
-        // 查詢結束日期
-        endDate: endDate
-
-      })
-
+      body: JSON.stringify(requestData)
     });
 
+    console.log('HTTP Status:', response.status);
 
-    // 取得 GAS 回應
-    const result = await response.json();
+    // 先以文字方式取得回應
+    const responseText = await response.text();
 
-    console.log('GAS Response:', result);
+    console.log('GAS Response:', responseText);
 
+    // HTTP 狀態不是 200～299
+    if (!response.ok) {
+      throw new Error(
+        'HTTP ' + response.status + '：' + responseText
+      );
+    }
+
+    let result;
+
+    try {
+      // 將 GAS 回傳內容轉成 JSON
+      result = JSON.parse(responseText);
+    } catch (error) {
+      throw new Error(
+        'GAS 回傳內容不是 JSON：' + responseText
+      );
+    }
+
+    console.log('GAS Result:', result);
 
     // GAS 回傳成功
     if (result.success) {
-
       showMessage(
         '✅ 查詢完成\n日曆結果已傳送到 LINE。'
       );
-
     } else {
-
+      // GAS 回傳失敗
       showMessage(
         result.message || '查詢失敗。'
       );
-
     }
 
   } catch (error) {
-
+    // 顯示實際錯誤，方便目前測試
     console.error('日曆查詢失敗：', error);
 
     showMessage(
-      '日曆查詢失敗，請稍後再試。'
+      '日曆查詢失敗：' + error.message
     );
 
   } finally {
-
     // 恢復查詢按鈕
     searchButton.disabled = false;
-
   }
 }
 
