@@ -1,46 +1,100 @@
+<!-- ===== index.html ===== -->
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>📅 日曆查詢</title>
-  <link rel="stylesheet" href="style.css">
+
+  <!-- LINE LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+  <!-- 前端設定 -->
+  <script src="config.js"></script>
+
+  <!-- 頁面樣式 -->
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<div class="container">
-  <h1>📅 日曆查詢</h1>
+  <div class="container">
 
-  <div class="range-buttons">
-    <button onclick="selectRange('today')">今天</button>
-    <button onclick="selectRange('tomorrow')">明天</button>
-    <button onclick="selectRange('thisWeek')">本週</button>
-    <button onclick="selectRange('nextWeek')">下週</button>
-    <button onclick="selectRange('custom')">自訂</button>
-  </div>
+    <!-- 頁面標題 -->
+    <h1>📅 日曆查詢</h1>
 
-  <div id="customArea" class="custom-area hidden">
-    <div class="date-group">
-      <label>開始日期</label>
-      <input type="date" id="startDate">
-      <div id="startDateText" class="date-text"></div>
+    <!-- 查詢區間按鈕 -->
+    <div class="range-buttons">
+      <button type="button" onclick="selectRange('today')">
+        今天
+      </button>
+
+      <button type="button" onclick="selectRange('tomorrow')">
+        明天
+      </button>
+
+      <button type="button" onclick="selectRange('thisWeek')">
+        本週
+      </button>
+
+      <button type="button" onclick="selectRange('nextWeek')">
+        下週
+      </button>
+
+      <button type="button" onclick="selectRange('custom')">
+        自訂
+      </button>
     </div>
 
-    <div class="date-group">
-      <label>結束日期</label>
-      <input type="date" id="endDate">
-      <div id="endDateText" class="date-text"></div>
+    <!-- 日期選擇區 -->
+    <div id="customArea" class="custom-area">
+
+      <!-- 開始日期 -->
+      <div class="date-group">
+        <label for="startDate">開始日期</label>
+
+        <input
+          type="date"
+          id="startDate"
+        >
+
+        <!-- 顯示星期 -->
+        <div id="startDateText" class="date-text"></div>
+      </div>
+
+      <!-- 結束日期 -->
+      <div class="date-group">
+        <label for="endDate">結束日期</label>
+
+        <input
+          type="date"
+          id="endDate"
+        >
+
+        <!-- 顯示星期 -->
+        <div id="endDateText" class="date-text"></div>
+      </div>
+
     </div>
+
+    <!-- 查詢按鈕 -->
+    <button
+      type="button"
+      id="searchButton"
+      class="search-button"
+      onclick="searchCalendar()"
+    >
+      查詢日曆
+    </button>
+
+    <!-- 狀態訊息 -->
+    <div id="message" class="message"></div>
+
   </div>
 
-  <button id="searchButton" class="search-button" onclick="searchCalendar()">
-    查詢日曆
-  </button>
+  <!-- 前端程式 -->
+  <script src="app.js"></script>
 
-  <div id="message" class="message"></div>
-</div>
-
-<script src="app.js"></script>
 </body>
 </html>
