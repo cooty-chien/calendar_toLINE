@@ -19,6 +19,7 @@ body {
   margin: 0 auto;
 }
 
+/* ===== 頁面標題 ===== */
 .page-header {
   margin-bottom: 20px;
 }
@@ -36,7 +37,6 @@ body {
 }
 
 /* ===== LIFF 狀態 ===== */
-
 .status {
   margin-bottom: 16px;
   padding: 12px 14px;
@@ -59,8 +59,7 @@ body {
   color: #c62828;
 }
 
-/* ===== 卡片 ===== */
-
+/* ===== 一般卡片 ===== */
 .form-card {
   margin-bottom: 16px;
   padding: 20px;
@@ -86,7 +85,6 @@ body {
 }
 
 /* ===== 表單 ===== */
-
 .form-group {
   margin-bottom: 14px;
 }
@@ -120,8 +118,28 @@ input[type="date"]:focus {
   border-color: #888;
 }
 
-/* ===== 自訂日期 ===== */
+/* ===== 查詢日期區間 ===== */
+.date-range-display {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: #f5f6f8;
+}
 
+.date-range-title {
+  margin-bottom: 6px;
+  color: #777;
+  font-size: 14px;
+}
+
+.date-range-text {
+  color: #222;
+  font-size: 17px;
+  font-weight: bold;
+  line-height: 1.5;
+}
+
+/* ===== 自訂日期 ===== */
 .custom-date {
   margin-top: 18px;
   padding-top: 18px;
@@ -141,8 +159,7 @@ input[type="date"]:focus {
   font-size: 14px;
 }
 
-/* ===== 選項 ===== */
-
+/* ===== 日曆來源 ===== */
 .option-row {
   display: flex;
   align-items: center;
@@ -173,7 +190,6 @@ input[type="date"]:focus {
 }
 
 /* ===== Toggle ===== */
-
 .switch {
   position: relative;
   flex: 0 0 auto;
@@ -218,7 +234,6 @@ input[type="date"]:focus {
 }
 
 /* ===== 查詢按鈕 ===== */
-
 .search-btn {
   width: 100%;
   height: 58px;
@@ -241,8 +256,7 @@ input[type="date"]:focus {
   cursor: default;
 }
 
-/* ===== 訊息 ===== */
-
+/* ===== 查詢訊息 ===== */
 .message {
   min-height: 24px;
   margin-bottom: 16px;
@@ -254,7 +268,6 @@ input[type="date"]:focus {
 }
 
 /* ===== Debug ===== */
-
 .debug-panel {
   margin-top: 16px;
   padding: 16px;
@@ -289,13 +302,11 @@ input[type="date"]:focus {
 }
 
 /* ===== 隱藏 ===== */
-
 .hidden {
   display: none;
 }
 
 /* ===== 頁尾 ===== */
-
 .page-footer {
   padding: 20px 0 10px;
   color: #aaa;
@@ -304,7 +315,6 @@ input[type="date"]:focus {
 }
 
 /* ===== 手機 ===== */
-
 @media (max-width: 400px) {
   body {
     padding: 16px;
