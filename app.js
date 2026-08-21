@@ -1,5 +1,5 @@
 // ===== app.js =====
-// LIFF 初始化、快速日期選擇、日期驗證、GAS API 呼叫
+// LIFF 初始化、快速日期選擇、日期驗證、日曆來源、GAS API 呼叫
 
 let lineUserId = '';
 let isLiffReady = false;
@@ -35,7 +35,6 @@ async function initializeLiff() {
     }
 
     const profile = await liff.getProfile();
-
     lineUserId = profile.userId || '';
 
     if (!lineUserId) {
@@ -45,41 +44,27 @@ async function initializeLiff() {
     console.log('LINE User ID：', lineUserId);
 
     isLiffReady = true;
-
     setStatus('success', 'LINE 已連線');
-
     refreshBtn.disabled = false;
-
     validateDateRange();
-
   } catch (error) {
     console.error('LIFF 初始化失敗：', error);
-
     isLiffReady = false;
-
-    setStatus(
-      'error',
-      'LIFF 初始化失敗：' + getErrorMessage(error)
-    );
-
+    setStatus('error', 'LIFF 初始化失敗：' + getErrorMessage(error));
     validateDateRange();
   }
 }
 
 // ===== 設定預設日期 =====
-// 預設為「今天」
 function setDefaultDates() {
   const dateType = document.getElementById('dateType');
-
   dateType.value = 'today';
-
   applyDateType('today');
 }
 
 // ===== 快速日期選擇 =====
 function changeDateType() {
   const dateType = document.getElementById('dateType').value;
-
   applyDateType(dateType);
 }
 
@@ -88,7 +73,6 @@ function applyDateType(type) {
   const customDate = document.getElementById('customDate');
   const startDate = document.getElementById('startDate');
   const endDate = document.getElementById('endDate');
-
   const today = startOfDay(new Date());
 
   customDate.classList.add('hidden');
@@ -101,8 +85,7 @@ function applyDateType(type) {
     }
 
     if (!endDate.value) {
-      const defaultEnd = addDays(today, 1);
-      endDate.value = formatDateInput(defaultEnd);
+      endDate.value = formatDateInput(addDays(today, 1));
     }
 
     validateDateRange();
@@ -113,36 +96,26 @@ function applyDateType(type) {
   let end = new Date(today);
 
   switch (type) {
-    // ===== 今天 =====
     case 'today':
       start = new Date(today);
       end = addDays(today, 1);
       break;
-
-    // ===== 明天 =====
     case 'tomorrow':
       start = addDays(today, 1);
       end = addDays(today, 2);
       break;
-
-    // ===== 後天 =====
     case 'dayAfterTomorrow':
       start = addDays(today, 2);
       end = addDays(today, 3);
       break;
-
-    // ===== 未來 7 天 =====
     case '7':
       start = new Date(today);
       end = addDays(today, 7);
       break;
-
-    // ===== 未來 30 天 =====
     case '30':
       start = new Date(today);
       end = addDays(today, 30);
       break;
-
     default:
       start = new Date(today);
       end = addDays(today, 1);
@@ -151,7 +124,6 @@ function applyDateType(type) {
 
   startDate.value = formatDateInput(start);
   endDate.value = formatDateInput(end);
-
   validateDateRange();
 }
 
@@ -177,7 +149,6 @@ function validateDateRange() {
   const start = parseDate(startValue);
   const end = parseDate(endValue);
 
-  // ===== 結束日期不可早於開始日期 =====
   if (end < start) {
     dateRangeInfo.textContent = '查詢期間：日期錯誤';
     dateError.textContent = '結束日期不能早於開始日期。';
@@ -186,11 +157,9 @@ function validateDateRange() {
     return false;
   }
 
-  // ===== 計算日期區間 =====
   const diff = end.getTime() - start.getTime();
   const days = Math.round(diff / 86400000);
 
-  // ===== 不允許 0 天 =====
   if (days <= 0) {
     dateRangeInfo.textContent = '查詢期間：請選擇至少 1 天';
     dateError.textContent = '請選擇有效的查詢日期區間。';
@@ -199,7 +168,6 @@ function validateDateRange() {
     return false;
   }
 
-  // ===== 最多 30 天 =====
   if (days > 30) {
     dateRangeInfo.textContent =
       '查詢期間：' +
@@ -220,7 +188,6 @@ function validateDateRange() {
     return false;
   }
 
-  // ===== 正常日期 =====
   dateRangeInfo.textContent =
     '查詢期間：' +
     formatDisplayDate(start) +
@@ -231,7 +198,6 @@ function validateDateRange() {
     ' 天';
 
   searchBtn.disabled = !isLiffReady || isSearching;
-
   return true;
 }
 
@@ -242,10 +208,7 @@ async function searchCalendar() {
   }
 
   if (!isLiffReady) {
-    showResult(
-      '查詢失敗',
-      'LIFF 尚未初始化完成。'
-    );
+    showResult('查詢失敗', 'LIFF 尚未初始化完成。');
     return;
   }
 
@@ -255,22 +218,28 @@ async function searchCalendar() {
 
   const startDate = document.getElementById('startDate').value;
   const endDate = document.getElementById('endDate').value;
+  const useIcloud = document.getElementById('useIcloud').checked;
+  const useGoogle = document.getElementById('useGoogle').checked;
   const searchBtn = document.getElementById('searchBtn');
+
+  if (!useIcloud && !useGoogle) {
+    showResult('無法查詢', '請至少選擇一個日曆來源。');
+    return;
+  }
 
   try {
     isSearching = true;
-
     searchBtn.disabled = true;
-    searchBtn.innerHTML =
-      '<span>⏳</span><span>查詢中...</span>';
-
+    searchBtn.innerHTML = '<span>⏳</span><span>查詢中...</span>';
     hideResult();
 
     const requestData = {
       action: 'searchCalendar',
       userId: lineUserId,
       startDate: startDate,
-      endDate: endDate
+      endDate: endDate,
+      useIcloud: useIcloud,
+      useGoogle: useGoogle
     };
 
     console.log('送出資料：', requestData);
@@ -288,7 +257,6 @@ async function searchCalendar() {
     console.log('HTTP Status：', response.status);
     console.log('GAS Response：', responseText);
 
-    // ===== 顯示 API 回應 =====
     showDebug(responseText);
 
     if (!response.ok) {
@@ -312,10 +280,7 @@ async function searchCalendar() {
     }
 
     if (!result.success) {
-      throw new Error(
-        result.message ||
-        '日曆查詢失敗'
-      );
+      throw new Error(result.message || '日曆查詢失敗');
     }
 
     showResult(
@@ -326,21 +291,13 @@ async function searchCalendar() {
       formatDisplayDate(parseDate(endDate)) +
       ' 的行事曆結果推播到 LINE。'
     );
-
   } catch (error) {
     console.error('日曆查詢失敗：', error);
-
-    showResult(
-      '日曆查詢失敗',
-      getErrorMessage(error)
-    );
-
+    showResult('日曆查詢失敗', getErrorMessage(error));
   } finally {
     isSearching = false;
-
     searchBtn.innerHTML =
       '<span class="search-icon">🔎</span><span>開始查詢</span>';
-
     validateDateRange();
   }
 }
@@ -376,7 +333,6 @@ function showResult(title, message) {
 
   titleElement.textContent = title;
   messageElement.textContent = message;
-
   panel.classList.remove('hidden');
 }
 
@@ -397,7 +353,6 @@ function showDebug(text) {
 // ===== Debug 收合 =====
 function toggleDebug() {
   const panel = document.getElementById('debugPanel');
-
   panel.classList.toggle('hidden');
 }
 
@@ -415,25 +370,17 @@ function parseDate(value) {
 // ===== Date → yyyy-MM-dd =====
 function formatDateInput(date) {
   const year = date.getFullYear();
-  const month = String(
-    date.getMonth() + 1
-  ).padStart(2, '0');
-  const day = String(
-    date.getDate()
-  ).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
 
   return year + '-' + month + '-' + day;
 }
 
 // ===== Date → MM/dd =====
 function formatDisplayDate(date) {
-  return String(
-    date.getMonth() + 1
-  ).padStart(2, '0') +
+  return String(date.getMonth() + 1).padStart(2, '0') +
     '/' +
-    String(
-      date.getDate()
-    ).padStart(2, '0');
+    String(date.getDate()).padStart(2, '0');
 }
 
 // ===== 日期加減 =====
