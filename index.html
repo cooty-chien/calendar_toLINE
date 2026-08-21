@@ -11,20 +11,18 @@
   <!-- ===== 固定上方功能列 ===== -->
   <header class="top-bar">
     <div class="top-title">
-      <span class="calendar-icon">📅</span>
+      <div class="calendar-icon">📅</div>
       <div>
         <h1>行事曆查詢</h1>
         <span>iCloud ＋ Google Calendar</span>
       </div>
     </div>
-    <button id="refreshBtn" class="refresh-btn" onclick="refreshPage()" disabled>
-      ↻
-    </button>
+    <button id="refreshBtn" class="refresh-btn" onclick="refreshPage" disabled>↻</button>
   </header>
 
   <!-- ===== 頁面主要內容 ===== -->
   <main class="container">
-    <!-- ===== LIFF 狀態 ===== -->
+    <!-- ===== LIFF 連線狀態 ===== -->
     <div id="status" class="status status-loading" aria-live="polite">
       <span class="status-dot"></span>
       <span class="status-text">LIFF 初始化中...</span>
@@ -39,35 +37,51 @@
         </div>
       </div>
 
-      <!-- ===== 開始日期 ===== -->
+      <!-- ===== 快速日期選擇 ===== -->
       <div class="form-group">
-        <label for="startDate">開始日期</label>
-        <input type="date" id="startDate" onchange="validateDateRange()">
+        <label for="dateType">快速選擇</label>
+        <select id="dateType" onchange="changeDateType()">
+          <option value="today">今天</option>
+          <option value="tomorrow">明天</option>
+          <option value="dayAfterTomorrow">後天</option>
+          <option value="7">未來 7 天</option>
+          <option value="30">未來 30 天</option>
+          <option value="custom">自訂日期</option>
+        </select>
       </div>
 
-      <!-- ===== 結束日期 ===== -->
-      <div class="form-group">
-        <label for="endDate">結束日期</label>
-        <input type="date" id="endDate" onchange="validateDateRange()">
+      <!-- ===== 自訂日期 ===== -->
+      <div id="customDate" class="custom-date hidden">
+        <div class="form-group">
+          <label for="startDate">開始日期</label>
+          <input type="date" id="startDate" onchange="validateDateRange()">
+        </div>
+
+        <div class="date-separator">至</div>
+
+        <div class="form-group">
+          <label for="endDate">結束日期</label>
+          <input type="date" id="endDate" onchange="validateDateRange()">
+        </div>
       </div>
 
-      <!-- ===== 日期區間提示 ===== -->
+      <!-- ===== 實際查詢日期 ===== -->
       <div id="dateRangeInfo" class="date-range-info">
         查詢期間：尚未選擇
       </div>
 
-      <!-- ===== 超過限制提示 ===== -->
+      <!-- ===== 日期錯誤 ===== -->
       <div id="dateError" class="date-error hidden">
-        查詢期間最多只能 30 天，請重新選擇日期。
+        查詢期間最多只能 30 天。
       </div>
     </section>
 
-    <!-- ===== 查詢摘要 ===== -->
+    <!-- ===== 查詢說明 ===== -->
     <section class="info-card">
       <div class="info-icon">📋</div>
       <div>
         <strong>查詢方式</strong>
-        <p>查詢結果會整理後直接推播到 LINE。</p>
+        <p>查詢結果整理後會直接推播到 LINE。</p>
       </div>
     </section>
 
@@ -77,14 +91,14 @@
       <span>開始查詢</span>
     </button>
 
-    <!-- ===== 查詢狀態 ===== -->
-    <div id="resultPanel" class="result-panel hidden">
+    <!-- ===== 查詢結果 ===== -->
+    <section id="resultPanel" class="result-panel hidden">
       <div class="result-icon">✓</div>
       <div>
         <strong id="resultTitle">查詢完成</strong>
         <p id="resultMessage"></p>
       </div>
-    </div>
+    </section>
 
     <!-- ===== API Debug ===== -->
     <section id="debugPanel" class="debug-card hidden">
