@@ -4,96 +4,101 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>日曆查詢</title>
+  <title>行事曆查詢</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-  <!-- ===== 固定功能列 ===== -->
+  <!-- ===== 固定上方功能列 ===== -->
   <header class="top-bar">
     <div class="top-title">
-      <h1>📅 日曆查詢</h1>
-      <span>iCloud + Google Calendar</span>
+      <span class="calendar-icon">📅</span>
+      <div>
+        <h1>行事曆查詢</h1>
+        <span>iCloud ＋ Google Calendar</span>
+      </div>
     </div>
-
-    <button
-      type="button"
-      class="refresh-btn"
-      onclick="location.reload()"
-      aria-label="重新整理"
-    >
+    <button id="refreshBtn" class="refresh-btn" onclick="refreshPage()" disabled>
       ↻
     </button>
   </header>
 
-  <!-- ===== 主要內容區 ===== -->
-  <main class="page-content">
-
+  <!-- ===== 頁面主要內容 ===== -->
+  <main class="container">
     <!-- ===== LIFF 狀態 ===== -->
-    <div id="status" class="status status-loading">
+    <div id="status" class="status status-loading" aria-live="polite">
+      <span class="status-dot"></span>
       <span class="status-text">LIFF 初始化中...</span>
     </div>
 
-    <!-- ===== 查詢區間 ===== -->
+    <!-- ===== 日期查詢區塊 ===== -->
     <section class="form-card">
-
       <div class="section-header">
-        <h2>查詢區間</h2>
-        <span>最多查詢 30 天</span>
+        <div>
+          <h2>📅 查詢日期</h2>
+          <span>選擇要查詢的行事曆期間</span>
+        </div>
       </div>
 
+      <!-- ===== 開始日期 ===== -->
       <div class="form-group">
-        <select id="dateType" onchange="changeDateType()">
-          <option value="today">今天</option>
-          <option value="tomorrow">明天</option>
-          <option value="week">本週</option>
-          <option value="nextWeek">下週</option>
-          <option value="custom">自訂日期</option>
-        </select>
+        <label for="startDate">開始日期</label>
+        <input type="date" id="startDate" onchange="validateDateRange()">
       </div>
 
-      <!-- ===== 自訂日期 ===== -->
-      <div id="customDate" class="custom-date hidden">
-
-        <div class="form-group">
-          <label for="startDate">開始日期</label>
-          <input type="date" id="startDate" onchange="validateDateRange()">
-        </div>
-
-        <div class="date-separator">至</div>
-
-        <div class="form-group">
-          <label for="endDate">結束日期</label>
-          <input type="date" id="endDate" onchange="validateDateRange()">
-        </div>
-
+      <!-- ===== 結束日期 ===== -->
+      <div class="form-group">
+        <label for="endDate">結束日期</label>
+        <input type="date" id="endDate" onchange="validateDateRange()">
       </div>
 
-      <!-- ===== 日期驗證訊息 ===== -->
-      <div id="dateError" class="date-error hidden"></div>
-
-      <!-- ===== 實際查詢日期 ===== -->
-      <div id="actualDateRange" class="actual-date-range">
-        查詢日期：尚未選擇
+      <!-- ===== 日期區間提示 ===== -->
+      <div id="dateRangeInfo" class="date-range-info">
+        查詢期間：尚未選擇
       </div>
 
+      <!-- ===== 超過限制提示 ===== -->
+      <div id="dateError" class="date-error hidden">
+        查詢期間最多只能 30 天，請重新選擇日期。
+      </div>
+    </section>
+
+    <!-- ===== 查詢摘要 ===== -->
+    <section class="info-card">
+      <div class="info-icon">📋</div>
+      <div>
+        <strong>查詢方式</strong>
+        <p>查詢結果會整理後直接推播到 LINE。</p>
+      </div>
     </section>
 
     <!-- ===== 查詢按鈕 ===== -->
-    <button
-      id="searchBtn"
-      class="search-btn"
-      onclick="searchCalendar()"
-      disabled
-    >
+    <button id="searchBtn" class="search-btn" onclick="searchCalendar()" disabled>
+      <span class="search-icon">🔎</span>
       <span>開始查詢</span>
     </button>
+
+    <!-- ===== 查詢狀態 ===== -->
+    <div id="resultPanel" class="result-panel hidden">
+      <div class="result-icon">✓</div>
+      <div>
+        <strong id="resultTitle">查詢完成</strong>
+        <p id="resultMessage"></p>
+      </div>
+    </div>
+
+    <!-- ===== API Debug ===== -->
+    <section id="debugPanel" class="debug-card hidden">
+      <div class="debug-header">
+        <strong>API 回應資訊</strong>
+        <button onclick="toggleDebug()">收起</button>
+      </div>
+      <pre id="debugText"></pre>
+    </section>
 
     <!-- ===== 頁尾 ===== -->
     <footer class="page-footer">
       Calendar Assistant
     </footer>
-
   </main>
 
   <!-- ===== LINE LIFF SDK ===== -->
@@ -104,6 +109,5 @@
 
   <!-- ===== 頁面 JavaScript ===== -->
   <script src="app.js"></script>
-
 </body>
 </html>
