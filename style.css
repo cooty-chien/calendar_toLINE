@@ -173,9 +173,10 @@ body {
 .custom-date-item label {
   display: block;
   margin-bottom: 7px;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: #475569;
+  text-align: center;
 }
 
 .form-group input[type="date"],
