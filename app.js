@@ -1,39 +1,7 @@
-// ===== app.js =====
-// 日曆 LIFF 前端程式
+// ===== 最大查詢天數 =====
+const MAX_QUERY_DAYS = 30;
 
-let userId = '';
-
-// ===== LIFF 初始化 =====
-document.addEventListener('DOMContentLoaded', async function () {
-  try {
-    await liff.init({
-      liffId: CONFIG.LIFF_ID
-    });
-
-    if (!liff.isLoggedIn()) {
-      setStatus('請登入 LINE', 'loading');
-      liff.login();
-      return;
-    }
-
-    const profile = await liff.getProfile();
-    userId = profile.userId;
-
-    console.log('LINE User ID:', userId);
-
-    setStatus('LINE 已連線', 'success');
-    document.getElementById('searchBtn').disabled = false;
-
-    // 預設選擇今天
-    changeDateType();
-  } catch (error) {
-    console.error('LIFF 初始化失敗：', error);
-    setStatus('LIFF 初始化失敗', 'error');
-    showMessage(error.message);
-  }
-});
-
-// ===== 日期類型變更 =====
+// ===== 變更查詢類型 =====
 function changeDateType() {
   const type = document.getElementById('dateType').value;
   const customDate = document.getElementById('customDate');
@@ -42,49 +10,155 @@ function changeDateType() {
     customDate.classList.remove('hidden');
 
     const today = new Date();
-    setDateValue('startDate', today);
-    setDateValue('endDate', today);
-    updateDateRangeText();
+    const todayText = formatInputDate(today);
+
+    if (!document.getElementById('startDate').value) {
+      document.getElementById('startDate').value = todayText;
+    }
+
+    if (!document.getElementById('endDate').value) {
+      document.getElementById('endDate').value = todayText;
+    }
+  } else {
+    customDate.classList.add('hidden');
+  }
+
+  updateDateRange();
+}
+
+// ===== 驗證自訂日期 =====
+function validateDateRange() {
+  updateDateRange();
+}
+
+// ===== 更新日期區間 =====
+function updateDateRange() {
+  const type = document.getElementById('dateType').value;
+  const error = document.getElementById('dateError');
+  const searchBtn = document.getElementById('searchBtn');
+  const actualRange = document.getElementById('actualDateRange');
+
+  error.classList.add('hidden');
+  error.textContent = '';
+
+  let range;
+
+  try {
+    range = getQueryDateRange(type);
+  } catch (e) {
+    searchBtn.disabled = true;
+    error.textContent = e.message;
+    error.classList.remove('hidden');
+    actualRange.textContent = '查詢日期：尚未設定';
     return;
   }
 
-  customDate.classList.add('hidden');
+  const start = range.start;
+  const end = range.end;
 
-  const today = new Date();
-  let startDate;
-  let endDate;
+  const days = calculateDays(start, end);
 
-  if (type === 'today') {
-    startDate = today;
-    endDate = today;
-  } else if (type === 'tomorrow') {
-    startDate = addDays(today, 1);
-    endDate = startDate;
-  } else if (type === 'thisWeek') {
-    // 本週固定為星期一～星期日
-    startDate = getMonday(today);
-    endDate = addDays(startDate, 6);
-  } else if (type === 'nextWeek') {
-    // 下週固定為星期一～星期日
-    startDate = addDays(getMonday(today), 7);
-    endDate = addDays(startDate, 6);
+  actualRange.textContent =
+    '查詢日期：' +
+    formatDisplayDate(start) +
+    ' ～ ' +
+    formatDisplayDate(addDays(end, -1)) +
+    '（共 ' +
+    days +
+    ' 天）';
+
+  if (days > MAX_QUERY_DAYS) {
+    error.textContent =
+      '查詢區間最多 ' +
+      MAX_QUERY_DAYS +
+      ' 天，目前為 ' +
+      days +
+      ' 天。';
+
+    error.classList.remove('hidden');
+    searchBtn.disabled = true;
+    return;
   }
 
-  setDateValue('startDate', startDate);
-  setDateValue('endDate', endDate);
-  updateDateRangeText();
+  if (days <= 0) {
+    error.textContent = '結束日期必須晚於或等於開始日期。';
+    error.classList.remove('hidden');
+    searchBtn.disabled = true;
+    return;
+  }
+
+  searchBtn.disabled = false;
 }
 
-// ===== 取得星期一 =====
-function getMonday(date) {
-  const result = new Date(date);
-  result.setHours(0, 0, 0, 0);
+// ===== 取得查詢日期 =====
+function getQueryDateRange(type) {
+  const today = startOfDay(new Date());
 
-  const day = result.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
+  switch (type) {
+    case 'today':
+      return {
+        start: today,
+        end: addDays(today, 1)
+      };
 
-  result.setDate(result.getDate() + diff);
-  return result;
+    case 'tomorrow':
+      return {
+        start: addDays(today, 1),
+        end: addDays(today, 2)
+      };
+
+    case 'week': {
+      const day = today.getDay();
+      const mondayOffset = day === 0 ? -6 : 1 - day;
+      const monday = addDays(today, mondayOffset);
+
+      return {
+        start: monday,
+        end: addDays(monday, 7)
+      };
+    }
+
+    case 'nextWeek': {
+      const day = today.getDay();
+      const mondayOffset = day === 0 ? -6 : 1 - day;
+      const nextMonday = addDays(today, mondayOffset + 7);
+
+      return {
+        start: nextMonday,
+        end: addDays(nextMonday, 7)
+      };
+    }
+
+    case 'custom': {
+      const startValue = document.getElementById('startDate').value;
+      const endValue = document.getElementById('endDate').value;
+
+      if (!startValue || !endValue) {
+        throw new Error('請選擇開始日期與結束日期。');
+      }
+
+      const start = parseInputDate(startValue);
+      const end = addDays(parseInputDate(endValue), 1);
+
+      if (end <= start) {
+        throw new Error('結束日期必須晚於或等於開始日期。');
+      }
+
+      return {
+        start: start,
+        end: end
+      };
+    }
+
+    default:
+      throw new Error('無效的查詢日期。');
+  }
+}
+
+// ===== 計算日期天數 =====
+function calculateDays(start, end) {
+  const milliseconds = end.getTime() - start.getTime();
+  return Math.round(milliseconds / 86400000);
 }
 
 // ===== 日期加減 =====
@@ -94,217 +168,54 @@ function addDays(date, days) {
   return result;
 }
 
-// ===== 設定日期 =====
-function setDateValue(id, date) {
-  if (!date) return;
+// ===== 取得當天 00:00 =====
+function startOfDay(date) {
+  const result = new Date(date);
+  result.setHours(0, 0, 0, 0);
+  return result;
+}
 
-  const input = document.getElementById(id);
+// ===== input date → Date =====
+function parseInputDate(value) {
+  const parts = value.split('-');
+
+  return new Date(
+    Number(parts[0]),
+    Number(parts[1]) - 1,
+    Number(parts[2])
+  );
+}
+
+// ===== Date → input date =====
+function formatInputDate(date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
 
-  input.value = `${year}-${month}-${day}`;
-  updateDateText(id);
+  return year + '-' + month + '-' + day;
 }
 
-// ===== 日期顯示星期 =====
-function updateDateText(id) {
-  const input = document.getElementById(id);
-  const output = document.getElementById(id + 'Text');
+// ===== 顯示日期 =====
+function formatDisplayDate(date) {
+  const weekNames = [
+    '日',
+    '一',
+    '二',
+    '三',
+    '四',
+    '五',
+    '六'
+  ];
 
-  if (!input.value) {
-    output.textContent = '';
-    return;
-  }
-
-  const date = new Date(input.value + 'T00:00:00');
-  output.textContent = formatDateWithWeek(date);
-}
-
-// ===== 更新查詢日期區間 =====
-function updateDateRangeText() {
-  const startDate = document.getElementById('startDate').value;
-  const endDate = document.getElementById('endDate').value;
-  const output = document.getElementById('dateRangeText');
-
-  if (!startDate || !endDate) {
-    output.textContent = '-';
-    return;
-  }
-
-  const start = new Date(startDate + 'T00:00:00');
-  const end = new Date(endDate + 'T00:00:00');
-
-  output.textContent =
-    formatDateWithWeek(start) + ' ～ ' + formatDateWithWeek(end);
-}
-
-// ===== 日期格式 + 星期 =====
-function formatDateWithWeek(date) {
-  const weekNames = ['日', '一', '二', '三', '四', '五', '六'];
-  const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
 
-  return `${year}/${month}/${day} (${weekNames[date.getDay()]})`;
-}
-
-// ===== 開始日期變更 =====
-document.getElementById('startDate').addEventListener('change', function () {
-  updateDateText('startDate');
-  updateDateRangeText();
-});
-
-// ===== 結束日期變更 =====
-document.getElementById('endDate').addEventListener('change', function () {
-  updateDateText('endDate');
-  updateDateRangeText();
-});
-
-// ===== 查詢日曆 =====
-async function searchCalendar() {
-  const startDate = document.getElementById('startDate').value;
-  const endDate = document.getElementById('endDate').value;
-  const useICloud = document.getElementById('icloud').checked;
-  const useGoogle = document.getElementById('google').checked;
-  const searchBtn = document.getElementById('searchBtn');
-
-  showDebug('');
-
-  if (!userId) {
-    showMessage('尚未取得 LINE User ID。');
-    return;
-  }
-
-  if (!startDate || !endDate) {
-    showMessage('請選擇日期。');
-    return;
-  }
-
-  if (startDate > endDate) {
-    showMessage('結束日期不能早於開始日期。');
-    return;
-  }
-
-  if (!useICloud && !useGoogle) {
-    showMessage('請至少選擇一個日曆來源。');
-    return;
-  }
-
-  searchBtn.disabled = true;
-  searchBtn.innerHTML = '<span>查詢中...</span>';
-  showMessage('');
-
-  // ===== 傳送給 GAS 的資料 =====
-  const requestData = {
-    action: 'searchCalendar',
-    userId: userId,
-    startDate: startDate,
-    endDate: endDate,
-    useICloud: useICloud,
-    useGoogle: useGoogle
-  };
-
-  try {
-    console.log('Calendar Request:', requestData);
-
-    // ===== 呼叫 GAS =====
-    // 使用 text/plain 避免 GitHub Pages → GAS 的 CORS preflight
-    const response = await fetch(CONFIG.GAS_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'text/plain;charset=utf-8'
-      },
-      body: JSON.stringify(requestData)
-    });
-
-    const responseText = await response.text();
-
-    console.log('GAS Response:', responseText);
-
-    // ===== 顯示 GAS 原始回應 =====
-    showDebug({
-      httpStatus: response.status,
-      response: responseText
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        'HTTP ' + response.status + '：' + responseText
-      );
-    }
-
-    let result;
-
-    try {
-      result = JSON.parse(responseText);
-    } catch (error) {
-      throw new Error(
-        'GAS 回傳內容不是 JSON：' + responseText
-      );
-    }
-
-    // ===== 顯示 GAS JSON =====
-    showDebug({
-      httpStatus: response.status,
-      result: result
-    });
-
-    if (!result.success) {
-      throw new Error(
-        result.message || '日曆查詢失敗。'
-      );
-    }
-
-    showMessage('查詢完成，結果已傳送到 LINE。');
-  } catch (error) {
-    console.error('日曆查詢失敗：', error);
-    showMessage('日曆查詢失敗：' + error.message);
-  } finally {
-    searchBtn.disabled = false;
-    searchBtn.innerHTML = '<span>開始查詢</span>';
-  }
-}
-
-// ===== 顯示 LIFF 狀態 =====
-function setStatus(text, type) {
-  const status = document.getElementById('status');
-  const statusText = status.querySelector('.status-text');
-
-  status.className = 'status';
-
-  if (type === 'success') {
-    status.classList.add('status-success');
-  } else if (type === 'error') {
-    status.classList.add('status-error');
-  } else {
-    status.classList.add('status-loading');
-  }
-
-  statusText.textContent = text;
-}
-
-// ===== 顯示訊息 =====
-function showMessage(text) {
-  document.getElementById('message').textContent = text;
-}
-
-// ===== 顯示 Debug =====
-function showDebug(data) {
-  const panel = document.getElementById('debugPanel');
-  const debugInfo = document.getElementById('debugInfo');
-
-  if (!data) {
-    panel.classList.add('hidden');
-    debugInfo.textContent = '';
-    return;
-  }
-
-  panel.classList.remove('hidden');
-
-  try {
-    debugInfo.textContent = JSON.stringify(data, null, 2);
-  } catch (error) {
-    debugInfo.textContent = String(data);
-  }
+  return (
+    month +
+    '/' +
+    day +
+    ' (' +
+    weekNames[date.getDay()] +
+    ')'
+  );
 }
