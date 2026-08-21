@@ -224,12 +224,6 @@ body {
   font-weight: 600;
 }
 
-.custom-date-item input[type="date"] {
-  width: 100%;
-  min-width: 0;
-  font-size: 15px;
-}
-
 /* ===== 日期區間資訊 ===== */
 .date-range-info {
   width: 100%;
