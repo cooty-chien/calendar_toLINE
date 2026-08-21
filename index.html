@@ -17,7 +17,7 @@
         <span>iCloud ＋ Google Calendar</span>
       </div>
     </div>
-    <button id="refreshBtn" class="refresh-btn" onclick="refreshPage" disabled>↻</button>
+    <button id="refreshBtn" class="refresh-btn" onclick="refreshPage()" disabled>↻</button>
   </header>
 
   <!-- ===== 頁面主要內容 ===== -->
@@ -28,7 +28,7 @@
       <span class="status-text">LIFF 初始化中...</span>
     </div>
 
-    <!-- ===== 日期查詢區塊 ===== -->
+    <!-- ===== 查詢日期 ===== -->
     <section class="form-card">
       <div class="section-header">
         <div>
@@ -52,14 +52,14 @@
 
       <!-- ===== 自訂日期 ===== -->
       <div id="customDate" class="custom-date hidden">
-        <div class="form-group">
+        <div class="custom-date-item">
           <label for="startDate">開始日期</label>
           <input type="date" id="startDate" onchange="validateDateRange()">
         </div>
 
         <div class="date-separator">至</div>
 
-        <div class="form-group">
+        <div class="custom-date-item">
           <label for="endDate">結束日期</label>
           <input type="date" id="endDate" onchange="validateDateRange()">
         </div>
@@ -73,6 +73,40 @@
       <!-- ===== 日期錯誤 ===== -->
       <div id="dateError" class="date-error hidden">
         查詢期間最多只能 30 天。
+      </div>
+    </section>
+
+    <!-- ===== 日曆來源 ===== -->
+    <section class="form-card">
+      <div class="section-header">
+        <div>
+          <h2>🗓️ 日曆來源</h2>
+          <span>選擇要查詢的行事曆</span>
+        </div>
+      </div>
+
+      <!-- ===== iCloud Calendar ===== -->
+      <div class="option-row">
+        <div class="option-text">
+          <strong>iCloud Calendar</strong>
+          <small>查詢 iCloud 行事曆</small>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="useIcloud" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <!-- ===== Google Calendar ===== -->
+      <div class="option-row">
+        <div class="option-text">
+          <strong>Google Calendar</strong>
+          <small>查詢 Google 行事曆</small>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="useGoogle" checked>
+          <span class="slider"></span>
+        </label>
       </div>
     </section>
 
@@ -117,10 +151,8 @@
 
   <!-- ===== LINE LIFF SDK ===== -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-
   <!-- ===== 專案設定 ===== -->
   <script src="config.js"></script>
-
   <!-- ===== 頁面 JavaScript ===== -->
   <script src="app.js"></script>
 </body>
